@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Service System</title>
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBI0mLoUz8mSJnGF6lNxiDg9rBLSqRrmTw",
+            authDomain: "kfxt-7d2f1.firebaseapp.com",
+            projectId: "kfxt-7d2f1",
+            storageBucket: "kfxt-7d2f1.appspot.com",
+            messagingSenderId: "355905987432",
+            appId: "1:355905987432:web:2ca15e137a7a824de8acdd",
+            measurementId: "G-L9S3H9RZXC"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        // Initialize Firestore
+        const db = getFirestore(app);
+
+        // Reference to the Firestore collection
+        const messagesRef = collection(db, 'messages');
+
+        // Function to send a message
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const messageText = messageInput.value;
+
+            if (messageText.trim() !== "") {
+                try {
+                    await addDoc(messagesRef, {
+                        text: messageText,
+                        timestamp: serverTimestamp()
+                    });
+                    messageInput.value = '';
+                } catch (error) {
+                    console.error('Error writing document: ', error);
+                }
+            }
+        }
+
+        // Function to display messages
+        function displayMessages() {
+            const q = query(messagesRef, orderBy('timestamp'));
+            onSnapshot(q, (snapshot) => {
+                const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = '';
+                snapshot.forEach((doc) => {
+                    const message = doc.data();
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = message.text;
+                    messagesDiv.appendChild(messageElement);
+                });
+            });
+        }
+
+        // Initialize display messages
+        window.onload = () => {
+            displayMessages();
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #chat {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        #messages {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+        #messageInput {
+            width: calc(100% - 80px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Customer Service System</h1>
+    <div id="chat">
+        <div id="messages"></div>
+        <input type="text" id="messageInput" placeholder="Type your message here">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</body>
+</html>
