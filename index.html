@@ -35,6 +35,8 @@
             const messageInput = document.getElementById('messageInput');
             const messageText = messageInput.value;
 
+            console.log("Message text:", messageText); // 添加调试信息
+
             if (messageText.trim() !== "") {
                 try {
                     await addDoc(messagesRef, {
@@ -42,6 +44,7 @@
                         timestamp: serverTimestamp()
                     });
                     messageInput.value = '';
+                    console.log("Message sent successfully"); // 添加调试信息
                 } catch (error) {
                     console.error('Error writing document: ', error);
                 }
@@ -67,6 +70,9 @@
         // Initialize display messages
         window.onload = () => {
             displayMessages();
+
+            // Add event listener to the button
+            document.getElementById('sendButton').addEventListener('click', sendMessage);
         }
     </script>
     <style>
@@ -148,7 +154,7 @@
         <div id="messages"></div>
         <div id="inputArea">
             <input type="text" id="messageInput" placeholder="Type your message here">
-            <button onclick="sendMessage()">Send</button>
+            <button id="sendButton">Send</button>
         </div>
     </div>
 </body>
