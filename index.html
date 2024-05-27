@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Customer Service System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
@@ -56,6 +57,7 @@
                 snapshot.forEach((doc) => {
                     const message = doc.data();
                     const messageElement = document.createElement('div');
+                    messageElement.classList.add('message');
                     messageElement.textContent = message.text;
                     messagesDiv.appendChild(messageElement);
                 });
@@ -70,16 +72,39 @@
     <style>
         body {
             font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        #header {
+            background-color: #282828;
+            color: white;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #header img {
+            height: 30px;
+            margin-right: 10px;
         }
         #chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             max-width: 600px;
-            margin: 20px auto;
+            margin: 0 auto;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
         }
         #messages {
-            max-height: 300px;
+            flex: 1;
             overflow-y: auto;
             margin-bottom: 10px;
             padding: 10px;
@@ -88,11 +113,18 @@
             background-color: #f9f9f9;
         }
         #messageInput {
-            width: calc(100% - 80px);
+            flex: 1;
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
             margin-right: 10px;
+        }
+        #inputArea {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-top: 1px solid #eee;
+            background-color: #f9f9f9;
         }
         button {
             padding: 10px 20px;
@@ -108,11 +140,16 @@
     </style>
 </head>
 <body>
-    <h1>Customer Service System</h1>
+    <div id="header">
+        <img src="https://example.com/logo.png" alt="Logo"> <!-- 替换为你的Logo URL -->
+        <h1>Customer Service System</h1>
+    </div>
     <div id="chat">
         <div id="messages"></div>
-        <input type="text" id="messageInput" placeholder="Type your message here">
-        <button onclick="sendMessage()">Send</button>
+        <div id="inputArea">
+            <input type="text" id="messageInput" placeholder="Type your message here">
+            <button onclick="sendMessage()">Send</button>
+        </div>
     </div>
 </body>
 </html>
