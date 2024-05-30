@@ -92,6 +92,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            width: 100%;
         }
         #header img {
             height: 30px;
@@ -101,13 +102,10 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            max-width: 600px;
-            margin: 0 auto;
+            max-width: 100%;
+            width: 100%;
             padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            background-color: white;
+            box-sizing: border-box;
         }
         #messages {
             flex: 1;
@@ -117,6 +115,7 @@
             border: 1px solid #eee;
             border-radius: 4px;
             background-color: #f9f9f9;
+            height: calc(100% - 80px);
         }
         #messageInput {
             flex: 1;
@@ -147,14 +146,14 @@
 </head>
 <body>
     <div id="header">
-        <img src="https://example.com/logo.png" alt="Logo"> <!-- 替换为你的Logo URL -->
-        <h1>Customer Service System</h1>
+        <img src="images/logo.png" alt="Logo"> <!-- 替换为仓库中的Logo图片路径 -->
+        <h1>客服</h1>
     </div>
     <div id="chat">
         <div id="messages"></div>
         <div id="inputArea">
             <input type="text" id="messageInput" placeholder="在这里输入你的消息">
-            <button id="sendButton">Send</button>
+            <button id="sendButton">发送</button>
         </div>
     </div>
 </body>
