@@ -70,12 +70,6 @@
                 const messagesDiv = document.getElementById('messages');
                 messagesDiv.innerHTML = ''; // Clear messages before displaying new ones
 
-                // Display custom message first
-                const customMessageElement = document.createElement('div');
-                customMessageElement.classList.add('message', 'customerService');
-                customMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
-                messagesDiv.appendChild(customMessageElement);
-
                 snapshot.forEach((doc) => {
                     const message = doc.data();
                     const messageElement = document.createElement('div');
@@ -102,8 +96,17 @@
             try {
                 await clearMessages();
                 console.log("Messages cleared successfully");
+
+                // Add custom welcome message to Firestore
+                await addDoc(messagesRef, {
+                    text: customMessage,
+                    timestamp: serverTimestamp(),
+                    sender: 'customerService'
+                });
+
+                console.log("Custom welcome message added successfully");
             } catch (error) {
-                console.error('Error clearing messages: ', error);
+                console.error('Error clearing messages or adding custom message: ', error);
             }
             
             // Display messages from Firestore
