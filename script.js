@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -49,14 +49,6 @@ async function sendMessage() {
     }
 }
 
-// Function to clear all messages except the welcome message
-async function clearMessages() {
-    const querySnapshot = await getDocs(messagesRef);
-    querySnapshot.forEach((doc) => {
-        deleteDoc(doc.ref);
-    });
-}
-
 // Function to display messages
 function displayMessages() {
     const q = query(messagesRef, orderBy('timestamp'));
@@ -102,10 +94,7 @@ function displayWelcomeMessage() {
 }
 
 // Initialize display messages and welcome message
-window.onload = async () => {
-    // Clear all messages except the welcome message
-    await clearMessages();
-
+window.onload = () => {
     // Display welcome message
     displayWelcomeMessage();
 
