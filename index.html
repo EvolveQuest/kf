@@ -7,7 +7,40 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+
+        // Function to get a cookie value by name
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        // Function to set a cookie
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = `; expires=${date.toUTCString()}`;
+            }
+            document.cookie = `${name}=${value || ""}${expires}; path=/`;
+        }
+
+        // Function to generate a UUID
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Get or set a unique user identifier
+        let userId = getCookie('userId');
+        if (!userId) {
+            userId = generateUUID();
+            setCookie('userId', userId, 365); // Cookie expires in 1 year
+        }
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -27,35 +60,28 @@
         // Initialize Firestore
         const db = getFirestore(app);
 
-        // Reference to the Firestore collection
-        const messagesRef = collection(db, 'messages');
+        // Reference to the Firestore collection for this user
+        const userMessagesRef = collection(db, `users/${userId}/messages`);
 
         // Custom welcome message
         const customMessage = '请将您的问题和支付订单号一起发送，并留下您的联系方式（推荐使用Telegram），我们会尽快回复您，谢谢！';
-
-        // Generate a random session ID function
-        function generateSessionID() {
-            return '_' + Math.random().toString(36).substr(2, 9);
-        }
-
-        // In the client, generate a session ID and store it in localStorage
-        const sessionID = localStorage.getItem('sessionID') || generateSessionID();
-        localStorage.setItem('sessionID', sessionID);
 
         // Function to send a message
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const messageText = messageInput.value;
 
+            console.log("Message text:", messageText); // 添加调试信息
+
             if (messageText.trim() !== "") {
                 try {
-                    await addDoc(messagesRef, {
+                    await addDoc(userMessagesRef, {
                         text: messageText,
                         timestamp: serverTimestamp(),
-                        sender: 'user',
-                        sessionID: sessionID // Include the session ID
+                        sender: 'user'
                     });
                     messageInput.value = '';
+                    console.log("Message sent successfully"); // 添加调试信息
                 } catch (error) {
                     console.error('Error writing document: ', error);
                 }
@@ -64,7 +90,7 @@
 
         // Function to display messages
         function displayMessages() {
-            const q = query(messagesRef, orderBy('timestamp'));
+            const q = query(userMessagesRef, orderBy('timestamp'));
             onSnapshot(q, (snapshot) => {
                 const messagesDiv = document.getElementById('messages');
                 messagesDiv.innerHTML = ''; // Clear messages before displaying new ones
@@ -77,19 +103,17 @@
 
                 snapshot.forEach((doc) => {
                     const message = doc.data();
-                    if (message.sessionID === sessionID) { // Only display messages from the current session
-                        const messageElement = document.createElement('div');
-                        messageElement.classList.add('message');
+                    const messageElement = document.createElement('div');
+                    messageElement.classList.add('message');
 
-                        if (message.sender === 'customerService') {
-                            messageElement.classList.add('customerService');
-                            messageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${message.text}</div>`;
-                        } else {
-                            messageElement.classList.add('user');
-                            messageElement.innerHTML = `<div class="messageBox">${message.text}</div>`;
-                        }
-                        messagesDiv.appendChild(messageElement);
+                    if (message.sender === 'customerService') {
+                        messageElement.classList.add('customerService');
+                        messageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${message.text}</div>`;
+                    } else {
+                        messageElement.classList.add('user');
+                        messageElement.innerHTML = `<div class="messageBox">${message.text}</div>`;
                     }
+                    messagesDiv.appendChild(messageElement);
                 });
 
                 // Scroll to the bottom
@@ -106,9 +130,117 @@
             document.getElementById('sendButton').addEventListener('click', sendMessage);
         }
     </script>
-    <!-- ... the rest of your HTML code ... -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        #header {
+            background-color: #282828;
+            color: white;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+        }
+        #header img {
+            height: 30px;
+            margin-right: 10px;
+        }
+        #chat {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            max-width: 100%;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            height: calc(100% - 80px);
+        }
+        #messageInput {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        #inputArea {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-top: 1px solid #eee;
+            background-color: #f9f9f9;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .customerService {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+        .user {
+            flex-direction: row-reverse;
+            justify-content: flex-start; /* 从 flex-end 修改为 flex-start */
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .messageBox {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #e1f5fe;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .customerService .messageBox {
+            background-color: #d1c4e9;
+        }
+        .user .messageBox {
+            background-color: #c8e6c9;
+        }
+    </style>
 </head>
 <body>
-    <!-- ... the rest of your HTML code ... -->
+    <div id="header">
+        <img src="Logo.png" alt="Logo"> <!-- 确保该路径和仓库中的文件名一致 -->
+        <h1>客服</h1>
+    </div>
+    <div id="chat">
+        <div id="messages"></div>
+        <div id="inputArea">
+            <input type="text" id="messageInput" placeholder="在这里输入你的消息">
+            <button id="sendButton">发送</button>
+        </div>
+    </div>
 </body>
 </html>
