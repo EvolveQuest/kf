@@ -7,7 +7,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -92,18 +92,6 @@
         window.onload = async () => {
             // Display messages from Firestore
             displayMessages();
-
-            // Add the custom message to Firestore
-            try {
-                await setDoc(doc(messagesRef, 'customMessage'), {
-                    text: customMessage,
-                    timestamp: serverTimestamp(),
-                    sender: 'customerService'
-                });
-                console.log("Custom message set successfully");
-            } catch (error) {
-                console.error('Error setting custom message: ', error);
-            }
 
             // Add event listener to the button
             document.getElementById('sendButton').addEventListener('click', sendMessage);
