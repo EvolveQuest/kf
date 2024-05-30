@@ -44,7 +44,8 @@
                 try {
                     await addDoc(messagesRef, {
                         text: messageText,
-                        timestamp: serverTimestamp()
+                        timestamp: serverTimestamp(),
+                        sender: 'user'
                     });
                     messageInput.value = '';
                     console.log("Message sent successfully"); // 添加调试信息
@@ -59,11 +60,19 @@
             const q = query(messagesRef, orderBy('timestamp'));
             onSnapshot(q, (snapshot) => {
                 const messagesDiv = document.getElementById('messages');
+                messagesDiv.innerHTML = ''; // Clear messages before displaying new ones
                 snapshot.forEach((doc) => {
                     const message = doc.data();
                     const messageElement = document.createElement('div');
                     messageElement.classList.add('message');
-                    messageElement.textContent = message.text;
+
+                    if (message.sender === 'customerService') {
+                        messageElement.classList.add('customerService');
+                        messageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${message.text}</div>`;
+                    } else {
+                        messageElement.classList.add('user');
+                        messageElement.innerHTML = `<div class="messageBox">${message.text}</div>`;
+                    }
                     messagesDiv.appendChild(messageElement);
                 });
             });
@@ -86,15 +95,16 @@
             // Display custom message
             const messagesDiv = document.getElementById('messages');
             const customMessageElement = document.createElement('div');
-            customMessageElement.classList.add('message');
-            customMessageElement.textContent = customMessage;
+            customMessageElement.classList.add('message', 'customerService');
+            customMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
             messagesDiv.appendChild(customMessageElement);
 
             // Add the custom message to Firestore
             try {
                 await setDoc(doc(messagesRef, 'customMessage'), {
                     text: customMessage,
-                    timestamp: serverTimestamp()
+                    timestamp: serverTimestamp(),
+                    sender: 'customerService'
                 });
                 console.log("Custom message set successfully");
             } catch (error) {
@@ -174,6 +184,37 @@
         }
         button:hover {
             background-color: #218838;
+        }
+        .message {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .customerService {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+        .user {
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .messageBox {
+            max-width: 70%;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #e1f5fe;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .customerService .messageBox {
+            background-color: #d1c4e9;
+        }
+        .user .messageBox {
+            background-color: #c8e6c9;
         }
     </style>
 </head>
