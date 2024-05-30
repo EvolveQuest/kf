@@ -1,9 +1,9 @@
-// Import the functions you need from the SDKs you need
+// Your JavaScript code here
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
 import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-// Your web app's Firebase configuration
+// Your Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyBI0mLoUz8mSJnGF6lNxiDg9rBLSqRrmTw",
     authDomain: "kfxt-7d2f1.firebaseapp.com",
@@ -17,22 +17,53 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
-
-// Initialize Firestore
 const db = getFirestore(app);
 
 // Reference to the Firestore collection
-const messagesRef = collection(db, 'messages');
+let messagesRef;
 
-// Custom welcome message
-const customMessage = '请将您的问题和支付订单号一起发送，并留下您的联系方式（推荐使用Telegram），我们会尽快回复您，谢谢！';
+// Function to generate unique user ID
+function generateUserId() {
+    // Generate a UUID (unique identifier)
+    return uuid.v4();
+}
+
+// Function to get or generate user ID from Cookie
+function getUserId() {
+    let userId = getCookie("userId");
+    if (!userId) {
+        userId = generateUserId();
+        // Set user ID in Cookie
+        setCookie("userId", userId, 30); // Cookie expires in 30 days
+    }
+    return userId;
+}
+
+// Function to set Cookie
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/";
+}
+
+// Function to get Cookie value by name
+function getCookie(name) {
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookies = decodedCookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + '=')) {
+            return cookie.substring(name.length + 1);
+        }
+    }
+    return null;
+}
 
 // Function to send a message
 async function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const messageText = messageInput.value;
-
-    console.log("Message text:", messageText); // 添加调试信息
 
     if (messageText.trim() !== "") {
         try {
@@ -42,7 +73,6 @@ async function sendMessage() {
                 sender: 'user'
             });
             messageInput.value = '';
-            console.log("Message sent successfully"); // 添加调试信息
         } catch (error) {
             console.error('Error writing document: ', error);
         }
@@ -55,12 +85,6 @@ function displayMessages() {
     onSnapshot(q, (snapshot) => {
         const messagesDiv = document.getElementById('messages');
         messagesDiv.innerHTML = ''; // Clear messages before displaying new ones
-
-        // Display custom message first
-        const customMessageElement = document.createElement('div');
-        customMessageElement.classList.add('message', 'customerService');
-        customMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
-        messagesDiv.appendChild(customMessageElement);
 
         snapshot.forEach((doc) => {
             const message = doc.data();
@@ -82,25 +106,20 @@ function displayMessages() {
     });
 }
 
-// Function to display welcome message
-function displayWelcomeMessage() {
-    const messagesDiv = document.getElementById('messages');
-
-    // Display custom welcome message
-    const welcomeMessageElement = document.createElement('div');
-    welcomeMessageElement.classList.add('message', 'customerService');
-    welcomeMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
-    messagesDiv.appendChild(welcomeMessageElement);
-}
-
-// Initialize display messages and welcome message
-window.onload = async () => {
-    // Display welcome message
-    displayWelcomeMessage();
-
+// Function to initialize user and messages
+function initializeUser() {
+    const userId = getUserId();
+    // Reference to the Firestore collection for the user
+    messagesRef = collection(db, 'users', userId, 'messages');
     // Display messages from Firestore
     displayMessages();
-
-    // Add event listener to the button
-    document.getElementById('sendButton').addEventListener('click', sendMessage);
 }
+
+// Initialize user and messages
+initializeUser();
+
+// Add event listener to the button
+document.getElementById('sendButton').addEventListener('click', sendMessage);
+</script>
+</body>
+</html>
