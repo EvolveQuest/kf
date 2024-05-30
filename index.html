@@ -7,7 +7,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDocs, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -29,6 +29,9 @@
 
         // Reference to the Firestore collection
         const messagesRef = collection(db, 'messages');
+
+        // Custom welcome message
+        const customMessage = '请将您的问题和支付订单号一起发送，并留下您的联系方式（推荐使用Telegram），我们会尽快回复您，谢谢！';
 
         // Function to send a message
         async function sendMessage() {
@@ -56,7 +59,6 @@
             const q = query(messagesRef, orderBy('timestamp'));
             onSnapshot(q, (snapshot) => {
                 const messagesDiv = document.getElementById('messages');
-                messagesDiv.innerHTML = '';
                 snapshot.forEach((doc) => {
                     const message = doc.data();
                     const messageElement = document.createElement('div');
@@ -85,8 +87,19 @@
             const messagesDiv = document.getElementById('messages');
             const customMessageElement = document.createElement('div');
             customMessageElement.classList.add('message');
-            customMessageElement.textContent = '请将您的问题和支付订单号一起发送，并留下您的联系方式（推荐使用Telegram），我们会尽快回复您，谢谢！';
+            customMessageElement.textContent = customMessage;
             messagesDiv.appendChild(customMessageElement);
+
+            // Add the custom message to Firestore
+            try {
+                await setDoc(doc(messagesRef, 'customMessage'), {
+                    text: customMessage,
+                    timestamp: serverTimestamp()
+                });
+                console.log("Custom message set successfully");
+            } catch (error) {
+                console.error('Error setting custom message: ', error);
+            }
 
             // Display messages from Firestore
             displayMessages();
