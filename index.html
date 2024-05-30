@@ -7,7 +7,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -55,20 +55,18 @@
             }
         }
 
-        // Function to clear messages
-        async function clearMessages() {
-            const querySnapshot = await getDocs(messagesRef);
-            querySnapshot.forEach(async (doc) => {
-                await deleteDoc(doc.ref);
-            });
-        }
-
         // Function to display messages
         function displayMessages() {
             const q = query(messagesRef, orderBy('timestamp'));
             onSnapshot(q, (snapshot) => {
                 const messagesDiv = document.getElementById('messages');
                 messagesDiv.innerHTML = ''; // Clear messages before displaying new ones
+
+                // Display custom message first
+                const customMessageElement = document.createElement('div');
+                customMessageElement.classList.add('message', 'customerService');
+                customMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
+                messagesDiv.appendChild(customMessageElement);
 
                 snapshot.forEach((doc) => {
                     const message = doc.data();
@@ -92,23 +90,6 @@
 
         // Initialize display messages
         window.onload = async () => {
-            // Clear messages from Firestore collection
-            try {
-                await clearMessages();
-                console.log("Messages cleared successfully");
-
-                // Add custom welcome message to Firestore
-                await addDoc(messagesRef, {
-                    text: customMessage,
-                    timestamp: serverTimestamp(),
-                    sender: 'customerService'
-                });
-
-                console.log("Custom welcome message added successfully");
-            } catch (error) {
-                console.error('Error clearing messages or adding custom message: ', error);
-            }
-            
             // Display messages from Firestore
             displayMessages();
 
@@ -192,9 +173,10 @@
             justify-content: flex-start;
         }
         .user {
-            flex-direction: row-reverse;
-            justify-content: flex-start;
-        }
+    flex-direction: row-reverse;
+    justify-content: flex-start; /* 从 flex-end 修改为 flex-start */
+}
+
         .avatar {
             width: 40px;
             height: 40px;
