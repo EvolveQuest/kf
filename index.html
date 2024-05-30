@@ -33,22 +33,29 @@
         // Custom welcome message
         const customMessage = '请将您的问题和支付订单号一起发送，并留下您的联系方式（推荐使用Telegram），我们会尽快回复您，谢谢！';
 
+        // Generate a random session ID function
+        function generateSessionID() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // In the client, generate a session ID and store it in localStorage
+        const sessionID = localStorage.getItem('sessionID') || generateSessionID();
+        localStorage.setItem('sessionID', sessionID);
+
         // Function to send a message
         async function sendMessage() {
             const messageInput = document.getElementById('messageInput');
             const messageText = messageInput.value;
-
-            console.log("Message text:", messageText); // 添加调试信息
 
             if (messageText.trim() !== "") {
                 try {
                     await addDoc(messagesRef, {
                         text: messageText,
                         timestamp: serverTimestamp(),
-                        sender: 'user'
+                        sender: 'user',
+                        sessionID: sessionID // Include the session ID
                     });
                     messageInput.value = '';
-                    console.log("Message sent successfully"); // 添加调试信息
                 } catch (error) {
                     console.error('Error writing document: ', error);
                 }
@@ -70,17 +77,19 @@
 
                 snapshot.forEach((doc) => {
                     const message = doc.data();
-                    const messageElement = document.createElement('div');
-                    messageElement.classList.add('message');
+                    if (message.sessionID === sessionID) { // Only display messages from the current session
+                        const messageElement = document.createElement('div');
+                        messageElement.classList.add('message');
 
-                    if (message.sender === 'customerService') {
-                        messageElement.classList.add('customerService');
-                        messageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${message.text}</div>`;
-                    } else {
-                        messageElement.classList.add('user');
-                        messageElement.innerHTML = `<div class="messageBox">${message.text}</div>`;
+                        if (message.sender === 'customerService') {
+                            messageElement.classList.add('customerService');
+                            messageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${message.text}</div>`;
+                        } else {
+                            messageElement.classList.add('user');
+                            messageElement.innerHTML = `<div class="messageBox">${message.text}</div>`;
+                        }
+                        messagesDiv.appendChild(messageElement);
                     }
-                    messagesDiv.appendChild(messageElement);
                 });
 
                 // Scroll to the bottom
@@ -97,118 +106,9 @@
             document.getElementById('sendButton').addEventListener('click', sendMessage);
         }
     </script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            background-color: #f9f9f9;
-        }
-        #header {
-            background-color: #282828;
-            color: white;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-        #header img {
-            height: 30px;
-            margin-right: 10px;
-        }
-        #chat {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            max-width: 100%;
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        #messages {
-            flex: 1;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #eee;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            height: calc(100% - 80px);
-        }
-        #messageInput {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            margin-right: 10px;
-        }
-        #inputArea {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            border-top: 1px solid #eee;
-            background-color: #f9f9f9;
-        }
-        button {
-            padding: 10px 20px;
-            border: none;
-            background-color: #28a745;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .message {
-            display: flex;
-            margin-bottom: 10px;
-        }
-        .customerService {
-            flex-direction: row;
-            justify-content: flex-start;
-        }
-        .user {
-    flex-direction: row-reverse;
-    justify-content: flex-start; /* 从 flex-end 修改为 flex-start */
-}
-
-        .avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-        }
-        .messageBox {
-            max-width: 70%;
-            padding: 10px;
-            border-radius: 8px;
-            background-color: #e1f5fe;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .customerService .messageBox {
-            background-color: #d1c4e9;
-        }
-        .user .messageBox {
-            background-color: #c8e6c9;
-        }
-    </style>
+    <!-- ... the rest of your HTML code ... -->
 </head>
 <body>
-    <div id="header">
-        <img src="Logo.png" alt="Logo"> <!-- 确保该路径和仓库中的文件名一致 -->
-        <h1>客服</h1>
-    </div>
-    <div id="chat">
-        <div id="messages"></div>
-        <div id="inputArea">
-            <input type="text" id="messageInput" placeholder="在这里输入你的消息">
-            <button id="sendButton">发送</button>
-        </div>
-    </div>
+    <!-- ... the rest of your HTML code ... -->
 </body>
 </html>
