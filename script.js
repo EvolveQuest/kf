@@ -11,16 +11,9 @@ async function sendMessage() {
             // Save the message to local storage
             saveMessageToLocalStorage(messageText);
 
-            // Add the message to Firestore
-            await addDoc(messagesRef, {
-                text: messageText,
-                timestamp: serverTimestamp(),
-                sender: 'user'
-            });
-            
             messageInput.value = '';
         } catch (error) {
-            console.error('Error writing document: ', error);
+            console.error('Error sending message: ', error);
         }
     }
 }
