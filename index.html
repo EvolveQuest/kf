@@ -7,7 +7,7 @@
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
-        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -67,9 +67,26 @@
             });
         }
 
+        // Function to clear messages
+        async function clearMessages() {
+            const q = query(messagesRef, orderBy('timestamp'));
+            const snapshot = await getDocs(q);
+            snapshot.forEach(async (doc) => {
+                await deleteDoc(doc.ref);
+            });
+        }
+
         // Initialize display messages
-        window.onload = () => {
-            displayMessages();
+        window.onload = async () => {
+            // Clear messages from Firestore
+            await clearMessages();
+
+            // Display custom message
+            const messagesDiv = document.getElementById('messages');
+            const customMessageElement = document.createElement('div');
+            customMessageElement.classList.add('message');
+            customMessageElement.textContent = '请将您的问题和支付订单号一起发送，并留下您的联系方式（推荐使用Telegram），我们会尽快回复您，谢谢！';
+            messagesDiv.appendChild(customMessageElement);
 
             // Add event listener to the button
             document.getElementById('sendButton').addEventListener('click', sendMessage);
