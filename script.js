@@ -5,7 +5,13 @@ import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.g
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    // Your Firebase configuration
+    apiKey: "AIzaSyBI0mLoUz8mSJnGF6lNxiDg9rBLSqRrmTw",
+    authDomain: "kfxt-7d2f1.firebaseapp.com",
+    projectId: "kfxt-7d2f1",
+    storageBucket: "kfxt-7d2f1.appspot.com",
+    messagingSenderId: "355905987432",
+    appId: "1:355905987432:web:2ca15e137a7a824de8acdd",
+    measurementId: "G-L9S3H9RZXC"
 };
 
 // Initialize Firebase
@@ -26,49 +32,36 @@ async function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const messageText = messageInput.value;
 
-    if (messageText.trim() !== "") {
-        // Display the message before sending to Firestore
-        displayMessage(messageText, 'user');
-        messageInput.value = ''; // Clear input
+    console.log("Message text:", messageText); // 添加调试信息
 
+    if (messageText.trim() !== "") {
         try {
             await addDoc(messagesRef, {
                 text: messageText,
                 timestamp: serverTimestamp(),
                 sender: 'user'
             });
+            messageInput.value = '';
+            console.log("Message sent successfully"); // 添加调试信息
         } catch (error) {
             console.error('Error writing document: ', error);
         }
     }
 }
 
-// Function to display a message on the page
-function displayMessage(text, sender) {
-    const messagesDiv = document.getElementById('messages');
-    const messageElement = document.createElement('div');
-    messageElement.classList.add('message', sender);
-    messageElement.innerHTML = sender === 'customerService' ?
-        `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${text}</div>` :
-        `<div class="messageBox">${text}</div>`;
-    messagesDiv.appendChild(messageElement);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
-}
-
 // Function to display welcome message
 function displayWelcomeMessage() {
     const messagesDiv = document.getElementById('messages');
-    messagesDiv.innerHTML = ''; // Clear any previous messages
+    messagesDiv.innerHTML = ''; // Clear any existing messages
 
     // Display custom welcome message
     const welcomeMessageElement = document.createElement('div');
     welcomeMessageElement.classList.add('message', 'customerService');
     welcomeMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
     messagesDiv.appendChild(welcomeMessageElement);
-    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
 }
 
-// Initialize display welcome message and attach event listeners
+// Initialize display welcome message
 window.onload = async () => {
     // Display welcome message
     displayWelcomeMessage();
