@@ -1,62 +1,43 @@
-// Function to send a message and immediately display it on the page
+// Function to send a message and update UI immediately
 async function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const messageText = messageInput.value;
 
     if (messageText.trim() !== "") {
+        // Update UI immediately
+        displayMessage({
+            text: messageText,
+            sender: 'user'
+        });
+        messageInput.value = ''; // Clear input
+
         try {
-            // Add the message to the page immediately
-            displayMessage(messageText, 'user');
-
-            // Save the message to local storage
-            saveMessageToLocalStorage(messageText);
-
-            messageInput.value = '';
+            // Then, send to Firestore
+            await addDoc(messagesRef, {
+                text: messageText,
+                timestamp: serverTimestamp(),
+                sender: 'user'
+            });
         } catch (error) {
-            console.error('Error sending message: ', error);
+            console.error('Error writing document: ', error);
         }
     }
 }
 
-// Function to display a message on the page
-function displayMessage(message, sender) {
+// Function to display a message
+function displayMessage(message) {
     const messagesDiv = document.getElementById('messages');
     const messageElement = document.createElement('div');
-    messageElement.classList.add('message', sender);
-    messageElement.innerText = message;
-    messagesDiv.appendChild(messageElement);
-}
+    messageElement.classList.add('message');
 
-// Function to save the message to local storage
-function saveMessageToLocalStorage(message) {
-    // Retrieve existing messages from local storage
-    let storedMessages = localStorage.getItem('messages');
-    storedMessages = storedMessages ? JSON.parse(storedMessages) : [];
-
-    // Add the new message to the stored messages
-    storedMessages.push(message);
-
-    // Save the updated messages to local storage
-    localStorage.setItem('messages', JSON.stringify(storedMessages));
-}
-
-// Function to hide previously sent messages on page load
-function hidePreviousMessages() {
-    const storedMessages = localStorage.getItem('messages');
-    if (storedMessages) {
-        const messagesDiv = document.getElementById('messages');
-        messagesDiv.innerHTML = ''; // Clear any previous messages
+    // Check the sender to apply the correct styling
+    if (message.sender === 'customerService') {
+        messageElement.classList.add('customerService');
+        messageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${message.text}</div>`;
+    } else {
+        messageElement.classList.add('user');
+        messageElement.innerHTML = `<div class="messageBox">${message.text}</div>`;
     }
-}
-
-// Initialize display welcome message and hide previous messages
-window.onload = async () => {
-    // Display welcome message
-    displayWelcomeMessage();
-
-    // Hide previous messages
-    hidePreviousMessages();
-
-    // Add event listener to the button
-    document.getElementById('sendButton').addEventListener('click', sendMessage);
+    messagesDiv.appendChild(messageElement);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Scroll to the bottom
 }
