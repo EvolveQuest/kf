@@ -2,17 +2,16 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
 import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-auth.js"; // 添加匿名身份验证模块
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+    apiKey: "AIzaSyBI0mLoUz8mSJnGF6lNxiDg9rBLSqRrmTw",
+    authDomain: "kfxt-7d2f1.firebaseapp.com",
+    projectId: "kfxt-7d2f1",
+    storageBucket: "kfxt-7d2f1.appspot.com",
+    messagingSenderId: "355905987432",
+    appId: "1:355905987432:web:2ca15e137a7a824de8acdd",
+    measurementId: "G-L9S3H9RZXC"
 };
 
 // Initialize Firebase
@@ -94,22 +93,14 @@ function displayWelcomeMessage() {
     messagesDiv.appendChild(welcomeMessageElement);
 }
 
-// Function to sign in anonymously and initialize display messages and welcome message
-async function signInAnonymouslyAndInitialize() {
-    try {
-        // 执行匿名身份验证
-        await signInAnonymously(getAuth(app));
-        // 显示欢迎消息和消息
-        displayWelcomeMessage();
-        displayMessages();
-        // 添加事件监听器到按钮
-        document.getElementById('sendButton').addEventListener('click', sendMessage);
-    } catch (error) {
-        console.error('Error signing in anonymously: ', error);
-    }
-}
+// Initialize display messages and welcome message
+window.onload = async () => {
+    // Display welcome message
+    displayWelcomeMessage();
 
-// 当页面加载完成时，执行匿名身份验证和初始化
-window.onload = () => {
-    signInAnonymouslyAndInitialize();
-};
+    // Display messages from Firestore
+    displayMessages();
+
+    // Add event listener to the button
+    document.getElementById('sendButton').addEventListener('click', sendMessage);
+}
