@@ -11,7 +11,7 @@ body {
 #header {
     background-color: #282828;
     color: white;
-    padding: 5px;
+    padding: 2.5px; /* 将标题栏高度调小50% */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -21,6 +21,11 @@ body {
 #header img {
     height: 30px;
     margin-right: 10px;
+}
+
+#header h1 { 
+    font-size: 80%; /* 字体调小20% */
+    font-weight: normal; /* 字体不加粗 */
 }
 
 #chat {
