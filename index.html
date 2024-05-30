@@ -9,39 +9,6 @@
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
         import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
-        // Function to get a cookie value by name
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
-        // Function to set a cookie
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = `; expires=${date.toUTCString()}`;
-            }
-            document.cookie = `${name}=${value || ""}${expires}; path=/`;
-        }
-
-        // Function to generate a UUID
-        function generateUUID() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-                const r = (Math.random() * 16) | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            });
-        }
-
-        // Get or set a unique user identifier
-        let userId = getCookie('userId');
-        if (!userId) {
-            userId = generateUUID();
-            setCookie('userId', userId, 365); // Cookie expires in 1 year
-        }
-
         // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBI0mLoUz8mSJnGF6lNxiDg9rBLSqRrmTw",
@@ -60,8 +27,8 @@
         // Initialize Firestore
         const db = getFirestore(app);
 
-        // Reference to the Firestore collection for this user
-        const userMessagesRef = collection(db, `users/${userId}/messages`);
+        // Reference to the Firestore collection
+        const messagesRef = collection(db, 'messages');
 
         // Custom welcome message
         const customMessage = '请将您的问题和支付订单号一起发送，并留下您的联系方式（推荐使用Telegram），我们会尽快回复您，谢谢！';
@@ -75,7 +42,7 @@
 
             if (messageText.trim() !== "") {
                 try {
-                    await addDoc(userMessagesRef, {
+                    await addDoc(messagesRef, {
                         text: messageText,
                         timestamp: serverTimestamp(),
                         sender: 'user'
@@ -90,7 +57,7 @@
 
         // Function to display messages
         function displayMessages() {
-            const q = query(userMessagesRef, orderBy('timestamp'));
+            const q = query(messagesRef, orderBy('timestamp'));
             onSnapshot(q, (snapshot) => {
                 const messagesDiv = document.getElementById('messages');
                 messagesDiv.innerHTML = ''; // Clear messages before displaying new ones
@@ -128,13 +95,6 @@
 
             // Add event listener to the button
             document.getElementById('sendButton').addEventListener('click', sendMessage);
-
-            // Add event listener for 'Enter' key
-            document.getElementById('messageInput').addEventListener('keypress', function(event) {
-                if (event.key === 'Enter') {
-                    sendMessage();
-                }
-            });
         }
     </script>
     <style>
@@ -213,9 +173,10 @@
             justify-content: flex-start;
         }
         .user {
-            flex-direction: row-reverse;
-            justify-content: flex-start; /* 从 flex-end 修改为 flex-start */
-        }
+    flex-direction: row-reverse;
+    justify-content: flex-start; /* 从 flex-end 修改为 flex-start */
+}
+
         .avatar {
             width: 40px;
             height: 40px;
