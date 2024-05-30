@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-analytics.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore.js";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -32,8 +32,6 @@ async function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const messageText = messageInput.value;
 
-    console.log("Message text:", messageText); // 添加调试信息
-
     if (messageText.trim() !== "") {
         try {
             await addDoc(messagesRef, {
@@ -42,49 +40,16 @@ async function sendMessage() {
                 sender: 'user'
             });
             messageInput.value = '';
-            console.log("Message sent successfully"); // 添加调试信息
         } catch (error) {
             console.error('Error writing document: ', error);
         }
     }
 }
 
-// Function to display messages
-function displayMessages() {
-    const q = query(messagesRef, orderBy('timestamp'));
-    onSnapshot(q, (snapshot) => {
-        const messagesDiv = document.getElementById('messages');
-        messagesDiv.innerHTML = ''; // Clear messages before displaying new ones
-
-        // Display custom message first
-        const customMessageElement = document.createElement('div');
-        customMessageElement.classList.add('message', 'customerService');
-        customMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
-        messagesDiv.appendChild(customMessageElement);
-
-        snapshot.forEach((doc) => {
-            const message = doc.data();
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message');
-
-            if (message.sender === 'customerService') {
-                messageElement.classList.add('customerService');
-                messageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${message.text}</div>`;
-            } else {
-                messageElement.classList.add('user');
-                messageElement.innerHTML = `<div class="messageBox">${message.text}</div>`;
-            }
-            messagesDiv.appendChild(messageElement);
-        });
-
-        // Scroll to the bottom
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    });
-}
-
 // Function to display welcome message
 function displayWelcomeMessage() {
     const messagesDiv = document.getElementById('messages');
+    messagesDiv.innerHTML = ''; // Clear any previous messages
 
     // Display custom welcome message
     const welcomeMessageElement = document.createElement('div');
@@ -93,13 +58,10 @@ function displayWelcomeMessage() {
     messagesDiv.appendChild(welcomeMessageElement);
 }
 
-// Initialize display messages and welcome message
-window.onload = () => {
+// Initialize display welcome message
+window.onload = async () => {
     // Display welcome message
     displayWelcomeMessage();
-
-    // Display messages from Firestore
-    displayMessages();
 
     // Add event listener to the button
     document.getElementById('sendButton').addEventListener('click', sendMessage);
