@@ -25,7 +25,7 @@ const db = getFirestore(app);
 const messagesRef = collection(db, 'messages');
 
 // Custom welcome message
-const customMessage = '请将您的问题、账号、支付订单号一起发送，并留下您的联系方式，推荐使用Telegram，我们会尽快回复您，谢谢！';
+const customMessage = '请将您的问题，账号，支付订单号一起发送，也可以留下您联系方式，推荐使用Telegram，我们会尽快回复您，谢谢！';
 
 // Function to display a message on the page
 function displayMessageOnPage(text, sender) {
