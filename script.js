@@ -82,8 +82,22 @@ function displayMessages() {
     });
 }
 
-// Initialize display messages
+// Function to display welcome message
+function displayWelcomeMessage() {
+    const messagesDiv = document.getElementById('messages');
+
+    // Display custom welcome message
+    const welcomeMessageElement = document.createElement('div');
+    welcomeMessageElement.classList.add('message', 'customerService');
+    welcomeMessageElement.innerHTML = `<img src="Logo.png" alt="客服头像" class="avatar"><div class="messageBox">${customMessage}</div>`;
+    messagesDiv.appendChild(welcomeMessageElement);
+}
+
+// Initialize display messages and welcome message
 window.onload = async () => {
+    // Display welcome message
+    displayWelcomeMessage();
+
     // Display messages from Firestore
     displayMessages();
 
